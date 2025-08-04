@@ -1,0 +1,208 @@
+<!-- Page Header -->
+<div class="flex justify-between items-center mb-8">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <i class="fas fa-shopping-cart mr-3 text-primary-600"></i>
+            Riwayat Pembelian
+        </h1>
+        <p class="text-gray-600 mt-2">Kelola dan lihat semua transaksi pembelian</p>
+    </div>
+    <a href="/purchases/new" class="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center space-x-2 shadow-lg">
+        <i class="fas fa-plus"></i>
+        <span>Buat Pembelian</span>
+    </a>
+</div>
+
+<!-- Purchases List -->
+<% if @purchases.empty? %>
+    <div class="text-center py-16 bg-white rounded-xl shadow-lg">
+        <i class="fas fa-shopping-cart text-gray-300 text-6xl mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Belum Ada Pembelian</h3>
+        <p class="text-gray-600 mb-6">Mulai dengan membuat transaksi pembelian pertama</p>
+        <a href="/purchases/new" class="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors inline-flex items-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>Buat Pembelian Pertama</span>
+        </a>
+    </div>
+<% else %>
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Transaksi
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Produk
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Kuantitas
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Total Harga
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Tanggal
+                        </th>
+                        <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Aksi
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% @purchases.each do |purchase| %>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-receipt text-primary-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">#<%= purchase['id'] %></div>
+                                        <div class="text-sm text-gray-500">
+                                            <%= Time.parse(purchase['purchase_date']).strftime('%H:%M') rescue 'N/A' %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-medium text-gray-900">
+                                    <%= purchase['products'] ? purchase['products']['name'] : "Produk ID: #{purchase['product_id']}" %>
+                                </div>
+                                <% if purchase['products'] && purchase['products']['description'] %>
+                                    <div class="text-sm text-gray-500 truncate max-w-xs">
+                                        <%= purchase['products']['description'] %>
+                                    </div>
+                                <% end %>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <i class="fas fa-cubes text-gray-400 mr-2"></i>
+                                    <span class="text-sm font-medium text-gray-900"><%= purchase['quantity'] %></span>
+                                </div>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">
+                                    Rp <%= number_with_delimiter(purchase['total_price'].to_i) %>
+                                </div>
+                                <% if purchase['products'] %>
+                                    <div class="text-xs text-gray-500">
+                                        @ Rp <%= number_with_delimiter(purchase['products']['price'].to_i) %>
+                                    </div>
+                                <% end %>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <% if purchase['status'] == 'completed' %>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Selesai
+                                    </span>
+                                <% elsif purchase['status'] == 'cancelled' %>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="fas fa-times-circle mr-1"></i>
+                                        Dibatalkan
+                                    </span>
+                                <% else %>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Pending
+                                    </span>
+                                <% end %>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <%= Time.parse(purchase['purchase_date']).strftime('%d/%m/%Y') rescue 'N/A' %>
+                                </div>
+                                <% if purchase['cancelled_at'] %>
+                                    <div class="text-xs text-red-500">
+                                        Dibatalkan: <%= Time.parse(purchase['cancelled_at']).strftime('%d/%m/%Y') rescue 'N/A' %>
+                                    </div>
+                                <% end %>
+                            </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <% if purchase['status'] == 'completed' %>
+                                    <button onclick="cancelPurchase(<%= purchase['id'] %>)" 
+                                            class="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded transition-colors">
+                                        <i class="fas fa-ban mr-1"></i>
+                                        Batalkan
+                                    </button>
+                                <% else %>
+                                    <span class="text-gray-400">
+                                        <i class="fas fa-minus"></i>
+                                    </span>
+                                <% end %>
+                            </td>
+                        </tr>
+                    <% end %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-shopping-cart text-primary-600 text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-gray-900"><%= @purchases.length %></div>
+                    <div class="text-sm text-gray-600">Total Transaksi</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-gray-900">
+                        <%= @purchases.count { |p| p['status'] == 'completed' } %>
+                    </div>
+                    <div class="text-sm text-gray-600">Selesai</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-times-circle text-red-600 text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-gray-900">
+                        <%= @purchases.count { |p| p['status'] == 'cancelled' } %>
+                    </div>
+                    <div class="text-sm text-gray-600">Dibatalkan</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-money-bill-wave text-orange-600 text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-lg font-bold text-gray-900">
+                        Rp <%= number_with_delimiter(@purchases.select { |p| p['status'] == 'completed' }.sum { |p| p['total_price'].to_i }) %>
+                    </div>
+                    <div class="text-sm text-gray-600">Total Penjualan</div>
+                </div>
+            </div>
+        </div>
+    </div>
+<% end %>

@@ -1,0 +1,137 @@
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center space-x-3 mb-4">
+        <a href="/products" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-arrow-left text-lg"></i>
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <i class="fas fa-edit mr-3 text-primary-600"></i>
+            Edit Produk
+        </h1>
+    </div>
+    <p class="text-gray-600">Perbarui informasi produk di bawah ini</p>
+</div>
+
+<div class="max-w-2xl mx-auto">
+    <form method="POST" action="/products/<%= @product['id'] %>" class="bg-white shadow-xl rounded-xl p-8 border border-gray-100">
+        <input type="hidden" name="_method" value="PATCH">
+        
+        <!-- Product Name -->
+        <div class="mb-6">
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-tag mr-2 text-primary-600"></i>
+                Nama Produk
+            </label>
+            <input type="text" 
+                   id="name" 
+                   name="name" 
+                   required 
+                   value="<%= @product['name'] %>"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+        </div>
+
+        <!-- Product Description -->
+        <div class="mb-6">
+            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-align-left mr-2 text-primary-600"></i>
+                Deskripsi
+            </label>
+            <textarea id="description" 
+                      name="description" 
+                      rows="4" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"><%= @product['description'] %></textarea>
+        </div>
+
+        <!-- Price and Stock Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Price -->
+            <div>
+                <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-money-bill-wave mr-2 text-primary-600"></i>
+                    Harga (Rp)
+                </label>
+                <input type="number" 
+                       id="price" 
+                       name="price" 
+                       required 
+                       step="0.01" 
+                       min="0"
+                       value="<%= @product['price'] %>"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+            </div>
+
+            <!-- Stock -->
+            <div>
+                <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-cubes mr-2 text-primary-600"></i>
+                    Stok
+                </label>
+                <input type="number" 
+                       id="stock" 
+                       name="stock" 
+                       required 
+                       min="0"
+                       value="<%= @product['stock'] %>"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+            </div>
+        </div>
+
+        <!-- Current Information -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <h4 class="text-sm font-medium text-gray-900 mb-3">
+                <i class="fas fa-info-circle mr-2"></i>
+                Informasi Saat Ini
+            </h4>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <span class="text-gray-600">ID Produk:</span>
+                    <span class="font-medium text-gray-900 ml-2">#<%= @product['id'] %></span>
+                </div>
+                <div>
+                    <span class="text-gray-600">Dibuat:</span>
+                    <span class="font-medium text-gray-900 ml-2">
+                        <%= Time.parse(@product['created_at']).strftime('%d/%m/%Y %H:%M') rescue 'N/A' %>
+                    </span>
+                </div>
+                <% if @product['updated_at'] %>
+                <div class="col-span-2">
+                    <span class="text-gray-600">Terakhir Diupdate:</span>
+                    <span class="font-medium text-gray-900 ml-2">
+                        <%= Time.parse(@product['updated_at']).strftime('%d/%m/%Y %H:%M') rescue 'N/A' %>
+                    </span>
+                </div>
+                <% end %>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex space-x-4">
+            <button type="submit" 
+                    class="flex-1 bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center justify-center space-x-2 shadow-lg">
+                <i class="fas fa-save"></i>
+                <span>Update Produk</span>
+            </button>
+            <a href="/products" 
+               class="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2 border border-gray-300">
+                <i class="fas fa-times"></i>
+                <span>Batal</span>
+            </a>
+        </div>
+    </form>
+
+    <!-- Danger Zone -->
+    <div class="mt-8 bg-red-50 border border-red-200 rounded-lg p-6">
+        <h4 class="text-sm font-medium text-red-900 mb-3 flex items-center">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            Zona Bahaya
+        </h4>
+        <p class="text-sm text-red-700 mb-4">
+            Tindakan ini akan menghapus produk secara permanen dan tidak dapat dikembalikan.
+        </p>
+        <button onclick="confirmDelete(<%= @product['id'] %>, 'product')" 
+                class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center space-x-2">
+            <i class="fas fa-trash"></i>
+            <span>Hapus Produk</span>
+        </button>
+    </div>
+</div>
